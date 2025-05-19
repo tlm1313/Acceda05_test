@@ -8,15 +8,15 @@ use App\Models\Foto;
 class AdminController extends Controller
 {
 
-    
+
         //
-    
+
         public function __construct(){
-    
-          
+
+
             $this->middleware('EsAdmin');
-    
-    
+
+
         }
     /**
      * Display a listing of the resource.
@@ -24,7 +24,7 @@ class AdminController extends Controller
     public function index()
     {
         $usuarios = User::all();
-        return view('admin.zonaAd', compact('usuarios'));// zonaAd es la vista que se va a mostrar  
+        return view('admin.zonaAd', compact('usuarios'));// zonaAd es la vista que se va a mostrar
     }
 
     /**
@@ -32,8 +32,8 @@ class AdminController extends Controller
      */
     public function create()
     {
-       
-        return view('admin.create');// zonaAd es la vista que se va a mostrar  
+
+        return view('admin.create');// zonaAd es la vista que se va a mostrar
     }
 
     /**
@@ -41,18 +41,18 @@ class AdminController extends Controller
      */
     public function store(Request $request)
     {
-        //
-      /*   User::create( $request->all());
-        return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente'); */
-        $entrada = $request->all();
-        if($archivo = $request->file('foto_id')){
-            $nombreArchivo = $archivo->getClientOriginalName();
-            $archivo->move(public_path('fotos'), $nombreArchivo);
-            $foto = Foto::create(['foto' => $nombreArchivo]);
-            $entrada['foto_id'] = $foto->id;
-            
-        }
-            User::create($entrada);
+        $entrada = $request->except('_token', 'foto'); // Excluye el campo foto
+
+    if ($request->hasFile('foto_id') && $request->file('foto_id')->isValid()) {
+        $archivo = $request->file('foto_id');
+        $nombreArchivo = time().'_'.$archivo->getClientOriginalName();
+        $archivo->move(public_path('fotos'), $nombreArchivo);
+
+        $foto = Foto::create(['foto' => $nombreArchivo]);
+        $entrada['foto_id'] = $foto->id; // Asigna solo el ID
+    }
+
+    User::create($entrada);
             return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente');
 
     }
@@ -96,7 +96,7 @@ class AdminController extends Controller
         $foto = Foto::create(['foto' => $nombreArchivo]);
         $entrada['foto_id'] = $foto->id;
     }
-    
+
     $usuario->update($entrada);
     return redirect()->route('admin.index')->with('success', 'Usuario actualizado');
     }

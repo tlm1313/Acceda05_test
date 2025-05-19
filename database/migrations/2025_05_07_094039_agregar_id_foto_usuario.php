@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->string('foto_id'); 
+            $table->bigInteger('foto_id');
         });
     }
 

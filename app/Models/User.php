@@ -63,11 +63,12 @@ class User extends Authenticatable
 
 
     }
-    public function foto(){
-
-        return  $this->belongsTo('App\Models\Foto');
-
-    }
+   public function foto()
+{
+    return $this->belongsTo(Foto::class, 'foto_id')->withDefault([
+        'foto' => 'default.png'
+    ]);
+}
     public function registros()
 {
     return $this->hasMany(Registro::class);

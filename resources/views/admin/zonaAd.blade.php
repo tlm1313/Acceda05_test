@@ -65,19 +65,15 @@
                         <td class="align-middle">{{ $usuario->role->nombre_rol }}</td>
                         <td class="align-middle">{{ $usuario->email }}</td>
                         <td class="align-middle">
-                            @if($usuario->foto)
-                                <img src="/fotos/{{ $usuario->foto->foto }}" width="60" class="img-thumbnail">
-                            @else
-                                <img src="/fotos/default.png" width="60" class="img-thumbnail">
-                            @endif
+                            <img src="/fotos/{{ $usuario->foto->foto }}" width="60" class="img-thumbnail">
                         </td>
                         <td class="align-middle">
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="{{ route('admin.edit', $usuario->id) }}" 
+                                <a href="{{ route('admin.edit', $usuario->id) }}"
                                    class="btn btn-sm btn-warning">
                                     <i class="fas fa-edit"></i> Editar
                                 </a>
-                                
+
                                 <form action="{{ route('admin.destroy', $usuario->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')

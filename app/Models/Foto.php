@@ -10,5 +10,5 @@ class Foto extends Model
     protected $fillable = [
         'foto',
     ];
-    
+
 }
