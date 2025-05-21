@@ -17,7 +17,8 @@
                     <span class="badge bg-danger">Salida</span>
                 @endif
             </td>
-            <td>{{ $registro->fecha_hora->translatedFormat('d/m/Y H:i:s') }}</td>
+            <td>{{ $registro->fecha_hora->format('d/m/Y H:i:s') }}</td>
+            <td>{{ $registro->created_at->format('d/m/Y H:i:s') }}</td>
         </tr>
         @endforeach
     </tbody>

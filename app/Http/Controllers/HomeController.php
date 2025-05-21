@@ -103,7 +103,7 @@ public function index(Request $request)
                 return back()->with('error', $mensaje);
             }
 
-            if ($ultimoRegistro->created_at->diffInMinutes(now()) < 5) {
+            if ($ultimoRegistro->created_at->diffInMinutes(now()) < 1) {
                 return back()->with('error', 'Debes esperar al menos 5 minutos entre registros');
             }
         } elseif ($tipo === 'salida') {
@@ -113,7 +113,7 @@ public function index(Request $request)
         Registro::create([
             'user_id' => $userId,
             'tipo' => $tipo,
-            'fecha_hora' => now() // Asegura que sea un objeto Carbon
+            'fecha_hora' => now()->format('Y-m-d H:i:s') // Pasa en modo string la fecha y hora actual a la BD
         ]);
 
         return back()->with('success', ucfirst($tipo) . ' registrada correctamente');

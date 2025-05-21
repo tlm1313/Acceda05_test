@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Europe/Madrid', // 'UTC' por defecto lo cambio para q este en la zona horaria de España
 
     /*
     |--------------------------------------------------------------------------
