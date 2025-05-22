@@ -35,21 +35,28 @@ public function index(Request $request)
 
     // Registros semanales (últimos 7 días)
     $registrosSemanales = clone $registrosQuery;
-    $registrosSemanales = $registrosSemanales->where('fecha_hora', '>=', now()->subDays(7))->get();
+    $registrosSemanales = $registrosSemanales->where('fecha_hora', '>=', now()->subDays(7))
+                                ->paginate(10, ['*'], 'semana_page')
+                                ->appends($request->except('semana_page'));
 
     // Registros mensuales
     $registrosMensuales = clone $registrosQuery;
     $registrosMensuales = $registrosMensuales->whereMonth('fecha_hora', $mes)
                                 ->whereYear('fecha_hora', $anio)
-                                ->get();
+                                ->paginate(10, ['*'], 'mes_page')
+                                ->appends($request->except('mes_page'));
 
     // Registros por rango personalizado
-    $registrosPersonalizados = collect();
+     $registrosPersonalizados = $registrosQuery; // Inicialización
     if ($fechaInicio && $fechaFin) {
         $registrosPersonalizados = $registrosQuery->whereBetween('fecha_hora', [
             \Carbon\Carbon::parse($fechaInicio)->startOfDay(),
             \Carbon\Carbon::parse($fechaFin)->endOfDay()
-        ])->get();
+        ])
+        ->paginate(10, ['*'], 'personalizado_page')
+        ->appends($request->except('personalizado_page'));
+    } else {
+        $registrosPersonalizados = collect([]);
     }
 
     $estadoActual = $this->getEstadoActual($user);
