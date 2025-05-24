@@ -65,7 +65,11 @@
                         <td class="align-middle">{{ $usuario->role->nombre_rol }}</td>
                         <td class="align-middle">{{ $usuario->email }}</td>
                         <td class="align-middle">
-                            <img src="/fotos/{{ $usuario->foto->foto }}" width="60" class="img-thumbnail">
+                            @if($usuario->foto)
+                                <img src="/fotos/{{ $usuario->foto->foto }}" width="60" class="img-thumbnail">
+                            @else
+                                <img src="/fotos/default.png" width="60" class="img-thumbnail">
+                            @endif
                         </td>
                         <td class="align-middle">
                             <div class="d-flex justify-content-center gap-2">
@@ -82,30 +86,38 @@
                                         <i class="fas fa-trash"></i> Eliminar
                                     </button>
                                 </form>
-                                 <!-- Botón para ver detalles del usuario / acceso a modal -->
 
-                            @if($usuario->role->nombre_rol === 'Usuario')
-                                <button class="btn btn-sm btn-info view-user-details"
-                                        data-user-id="{{ $usuario->id }}">
-                                    <i class="fas fa-eye"></i> Ver
-                                </button>
-                            @endif
-
-
+                                @if($usuario->role->nombre_rol === 'Usuario')
+                                    <button class="btn btn-sm btn-info view-user-details"
+                                            data-user-id="{{ $usuario->id }}">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </button>
+                                @endif
                             </div>
-
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+
+        <!-- Paginación principal -->
+        @if($usuarios->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    {{ $usuarios->withQueryString()->links() }}
+                </div>
+                <div class="text-muted">
+                    Mostrando {{ $usuarios->firstItem() }} - {{ $usuarios->lastItem() }} de {{ $usuarios->total() }} registros
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 
 <style>
     .table th {
-        white-space: nowrap; /* Evita que los títulos se dividan en varias líneas */
+        white-space: nowrap;
     }
     .img-thumbnail {
         max-height: 60px;
@@ -115,8 +127,19 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
     }
+    .pagination {
+        flex-wrap: wrap;
+    }
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .page-link {
+        color: #0d6efd;
+    }
 </style>
-<!-- Modal para detalles (añade esto al final del archivo) -->
+
+<!-- Modal para detalles -->
 <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -125,9 +148,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="userDetailsContent">
-                <!-- Contenido cargado via AJAX -->
                 <div class="text-center py-4">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Cargando...</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -139,7 +162,6 @@
 
 @endsection
 
-<!-- Añade este script al final -->
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -153,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadUserDetails(userId);
     });
 
-     // Manejar los formularios de filtrado dentro del modal
+    // Manejar los formularios de filtrado dentro del modal
     document.addEventListener('submit', function(e) {
         const form = e.target.closest('#mesForm, #personalizadoForm');
         if (!form) return;
@@ -162,47 +184,35 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilters(form);
     });
 
-    // Manejar paginación y filtros dentro del modal
+    // Manejar eventos dentro del modal
     document.addEventListener('click', function(e) {
-        // Paginación
-        if (e.target.closest('.pagination a')) {
+        // Paginación del modal
+        const modalPageLink = e.target.closest('#userDetailsModal .pagination a');
+        if (modalPageLink) {
             e.preventDefault();
-            loadPaginatedDetails(e.target.closest('a').href);
+            loadModalPage(modalPageLink.href);
+            return;
         }
 
         // Pestañas de filtros
         const tabBtn = e.target.closest('#filterTabs .nav-link');
-        if (!tabBtn) return;
+        if (tabBtn) {
+            e.preventDefault();
+            const tipoFiltro = tabBtn.dataset.tipo;
+            const content = document.getElementById('userDetailsContent');
+            const userId = content.dataset.userId;
 
-        e.preventDefault();
-        const tipoFiltro = tabBtn.dataset.tipo;
-        const content = document.getElementById('userDetailsContent');
-        const userId = content.dataset.userId;
-
-        // Actualizar clases activas
-        document.querySelectorAll('#filterTabs .nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        tabBtn.classList.add('active');
-
-        // Mostrar/ocultar formularios
-        if (tipoFiltro === 'mes') {
-            document.getElementById('mesForm').classList.remove('d-none');
-            document.getElementById('personalizadoForm').classList.add('d-none');
-        } else if (tipoFiltro === 'personalizado') {
-            document.getElementById('personalizadoForm').classList.remove('d-none');
-            document.getElementById('mesForm').classList.add('d-none');
-        } else {
-            document.getElementById('mesForm').classList.add('d-none');
-            document.getElementById('personalizadoForm').classList.add('d-none');
+            updateActiveTab(tipoFiltro);
+            toggleFilterForms(tipoFiltro);
+            loadUserDetails(userId, tipoFiltro);
+            return;
         }
-
-        // Cargar datos con el nuevo filtro
-        loadUserDetails(userId, tipoFiltro);
     });
 
-    // Cargar detalles del usuario con filtro
-   function loadUserDetails(userId, tipoFiltro = 'semana') {
+    // ========== FUNCIONES PRINCIPALES ==========
+
+    // Cargar detalles del usuario en el modal
+    function loadUserDetails(userId, tipoFiltro = 'semana') {
         const modal = bootstrap.Modal.getOrCreateInstance('#userDetailsModal');
         const content = document.getElementById('userDetailsContent');
         content.dataset.userId = userId;
@@ -216,18 +226,53 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.text())
             .then(html => {
                 content.innerHTML = html;
-                // Actualizar clases activas después de cargar
                 updateActiveTab(tipoFiltro);
+                toggleFilterForms(tipoFiltro);
             })
             .catch(error => {
                 showError(content, error);
             });
     }
-    // Función para aplicar filtros
+
+    // Cargar páginas del modal
+    function loadModalPage(url) {
+        const content = document.getElementById('userDetailsContent');
+        const userId = content.dataset.userId;
+
+        showLoadingSpinner(content);
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                content.innerHTML = html;
+                content.dataset.userId = userId;
+
+                // Restaurar estado de los filtros
+                const activeTab = document.querySelector('#filterTabs .nav-link.active');
+                if (activeTab) {
+                    updateActiveTab(activeTab.dataset.tipo);
+                    toggleFilterForms(activeTab.dataset.tipo);
+                }
+            })
+            .catch(error => {
+                showError(content, error);
+            });
+    }
+
+    // Aplicar filtros en el modal
     function applyFilters(form) {
         const content = document.getElementById('userDetailsContent');
         const userId = content.dataset.userId;
         const formData = new FormData(form);
+
+        // Añadir el tipo de filtro si no está presente
+        if (!formData.has('tipo')) {
+            const activeTab = document.querySelector('#filterTabs .nav-link.active');
+            if (activeTab) {
+                formData.append('tipo', activeTab.dataset.tipo);
+            }
+        }
+
         const urlParams = new URLSearchParams(formData).toString();
 
         showLoadingSpinner(content);
@@ -236,11 +281,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.text())
             .then(html => {
                 content.innerHTML = html;
+                content.dataset.userId = userId;
             })
             .catch(error => {
                 showError(content, error);
             });
     }
+
+    // ========== FUNCIONES AUXILIARES ==========
 
     // Actualizar pestaña activa
     function updateActiveTab(tipoFiltro) {
@@ -252,20 +300,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-
-    // Cargar páginas adicionales
-    function loadPaginatedDetails(url) {
-        const content = document.getElementById('userDetailsContent');
-        showLoadingSpinner(content);
-
-        fetch(url)
-            .then(response => response.text())
-            .then(html => {
-                content.innerHTML = html;
-            })
-            .catch(error => {
-                showError(content, error);
-            });
+    // Mostrar/ocultar formularios de filtro
+    function toggleFilterForms(tipoFiltro) {
+        if (tipoFiltro === 'mes') {
+            document.getElementById('mesForm')?.classList?.remove('d-none');
+            document.getElementById('personalizadoForm')?.classList?.add('d-none');
+        } else if (tipoFiltro === 'personalizado') {
+            document.getElementById('personalizadoForm')?.classList?.remove('d-none');
+            document.getElementById('mesForm')?.classList?.add('d-none');
+        } else {
+            document.getElementById('mesForm')?.classList?.add('d-none');
+            document.getElementById('personalizadoForm')?.classList?.add('d-none');
+        }
     }
 
     // Mostrar spinner de carga
@@ -283,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = `
             <div class="alert alert-danger">
                 <h5>Error</h5>
-                <p>${error.message}</p>
+                <p>${error.message || 'Ocurrió un error al cargar los datos'}</p>
                 <button onclick="location.reload()" class="btn btn-sm btn-warning">
                     Recargar página
                 </button>

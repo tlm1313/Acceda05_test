@@ -24,8 +24,11 @@ class AdminController extends Controller
      */
     public function index()
     {
-        $usuarios = User::all();
-        return view('admin.zonaAd', compact('usuarios'));// zonaAd es la vista que se va a mostrar
+      /*   $usuarios = User::all();
+        return view('admin.zonaAd', compact('usuarios'));// zonaAd es la vista que se va a mostrar */
+
+        $usuarios = User::with(['role', 'foto'])->paginate(3); // 10 usuarios por página
+        return view('admin.zonaAd', compact('usuarios'));
     }
 
     /**

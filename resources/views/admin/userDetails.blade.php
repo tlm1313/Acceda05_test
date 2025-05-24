@@ -87,7 +87,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($registros->paginate(10) as $registro)
+                @forelse($registros->paginate(8) as $registro)
                 <tr>
                     <td>{{ $registro->fecha_hora->format('d/m/Y H:i') }}</td>
                     <td>
@@ -106,7 +106,7 @@
 
         <!-- Paginación -->
         <div class="d-flex justify-content-center mt-3">
-            {{ $registros->paginate(8)->links() }}
+            {{ $registros->paginate()->links() }}
         </div>
     </div>
 </div>
