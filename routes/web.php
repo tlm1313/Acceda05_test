@@ -38,9 +38,10 @@ Route::middleware(['auth', 'EsAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::patch('/{id}', [AdminController::class, 'update']);
     Route::delete('/{id}', [AdminController::class, 'destroy'])->name('destroy');
     // Ruta para ver detalles de un usuario
-    // Usar {id} en lugar de {user} para evitar conflictos
-    Route::get('/users/{id}/details', [AdminController::class, 'details'])
-        ->name('users.details');
+
+    Route::get('/users/{user}/details', [AdminController::class, 'details'])
+         ->name('admin.users.details');
+
 });
 
 // Ruta de prueba PDF (opcional)

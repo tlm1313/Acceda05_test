@@ -127,25 +127,14 @@ class AdminController extends Controller
      * Show the details of a specific user.
      */
 
-       public function details($id) // Cambiamos de User $user a $id
+       public function details($id)
 {
-    // Obtener usuario con relaciones
-    $user = User::with(['role', 'registros', 'foto'])->find($id);
+    $user = User::with(['role', 'foto'])->findOrFail($id);
 
-    if (!$user) {
-        abort(404, 'Usuario no encontrado');
-    }
-
-    // Verificar rol (opcional, según tus requisitos)
-    if ($user->role_id !== 2) { // 2 = Usuario
-        abort(403, 'Solo se pueden ver detalles de usuarios normales');
-    }
-
-    // Obtener registros
+    // Paginación simple con 5 registros por página
     $registros = $user->registros()
                      ->orderBy('fecha_hora', 'desc')
-                     ->take(20)
-                     ->get();
+                     ->paginate(8);
 
     return view('admin.userDetails', compact('user', 'registros'));
 }

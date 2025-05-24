@@ -142,20 +142,78 @@
 <!-- Añade este script al final -->
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    document.body.addEventListener('click', async (e) => {
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar clic en botones "Ver"
+    document.addEventListener('click', function(e) {
         const btn = e.target.closest('.view-user-details');
         if (!btn) return;
 
-        try {
-            const response = await fetch(`/admin/users/${btn.dataset.userId}/details`);
-            const html = await response.text();
-            document.getElementById('userDetailsContent').innerHTML = html;
-            new bootstrap.Modal('#userDetailsModal').show();
-        } catch (error) {
-            console.error("Error:", error);
+        e.preventDefault();
+        const userId = btn.dataset.userId;
+        loadUserDetails(userId);
+    });
+
+    // Manejar paginación dentro del modal
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.pagination a')) {
+            e.preventDefault();
+            const url = e.target.closest('a').href;
+            loadPaginatedDetails(url);
         }
     });
+
+    // Cargar detalles del usuario
+    function loadUserDetails(userId) {
+        const modal = new bootstrap.Modal('#userDetailsModal');
+        const content = document.getElementById('userDetailsContent');
+
+        content.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Cargando...</p>
+            </div>
+        `;
+
+        modal.show();
+
+        fetch(`/admin/users/${userId}/details`)
+            .then(response => response.text())
+            .then(html => {
+                content.innerHTML = html;
+            })
+            .catch(error => {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        Error al cargar datos: ${error.message}
+                    </div>
+                `;
+            });
+    }
+
+    // Cargar páginas adicionales
+    function loadPaginatedDetails(url) {
+        const content = document.getElementById('userDetailsContent');
+
+        content.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Cargando...</p>
+            </div>
+        `;
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                content.innerHTML = html;
+            })
+            .catch(error => {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        Error al cargar página: ${error.message}
+                    </div>
+                `;
+            });
+    }
 });
 </script>
 @endsection
