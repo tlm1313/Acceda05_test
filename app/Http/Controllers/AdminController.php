@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Foto;
+use Carbon\Carbon;
 class AdminController extends Controller
 {
 
@@ -127,15 +128,58 @@ class AdminController extends Controller
      * Show the details of a specific user.
      */
 
-       public function details($id)
+       public function details(Request $request, $id)
 {
     $user = User::with(['role', 'foto'])->findOrFail($id);
 
-    // Paginación simple con 5 registros por página
-    $registros = $user->registros()
-                     ->orderBy('fecha_hora', 'desc')
-                     ->paginate(8);
+    // Parámetros de filtrado
+    $tipoFiltro = $request->input('tipo', 'semana'); // semana/mes/personalizado
+    $mes = $request->input('mes', date('m'));
+    $anio = $request->input('anio', date('Y'));
+    $fechaInicio = $request->input('fecha_inicio');
+    $fechaFin = $request->input('fecha_fin');
 
-    return view('admin.userDetails', compact('user', 'registros'));
+    // Consulta base
+    $registros = $user->registros()->latest();
+
+    // Aplicar filtros según el tipo
+    switch ($tipoFiltro) {
+        case 'semana':
+            $registros->where('fecha_hora', '>=', now()->subDays(7));
+            break;
+
+        case 'mes':
+            $registros->whereMonth('fecha_hora', $mes)
+                     ->whereYear('fecha_hora', $anio);
+            break;
+
+        case 'personalizado':
+            if ($fechaInicio && $fechaFin) {
+                $registros->whereBetween('fecha_hora', [
+                    Carbon::parse($fechaInicio)->startOfDay(),
+                    Carbon::parse($fechaFin)->endOfDay()
+                ]);
+            }
+            break;
+    }
+
+    $meses = [
+        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+    ];
+
+    return view('admin.userDetails', compact(
+        'user',
+        'registros',
+        'meses',
+        'mes',
+        'anio',
+        'fechaInicio',
+        'fechaFin',
+        'tipoFiltro'
+    ));
+
+
 }
 }
