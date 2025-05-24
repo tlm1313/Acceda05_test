@@ -120,4 +120,33 @@ class AdminController extends Controller
         $usuario->delete();
         return redirect()->route('admin.index')->with('success', 'Usuario eliminado correctamente');
     }
+
+
+
+    /**
+     * Show the details of a specific user.
+     */
+
+       public function details($id) // Cambiamos de User $user a $id
+{
+    // Obtener usuario con relaciones
+    $user = User::with(['role', 'registros', 'foto'])->find($id);
+
+    if (!$user) {
+        abort(404, 'Usuario no encontrado');
+    }
+
+    // Verificar rol (opcional, según tus requisitos)
+    if ($user->role_id !== 2) { // 2 = Usuario
+        abort(403, 'Solo se pueden ver detalles de usuarios normales');
+    }
+
+    // Obtener registros
+    $registros = $user->registros()
+                     ->orderBy('fecha_hora', 'desc')
+                     ->take(20)
+                     ->get();
+
+    return view('admin.userDetails', compact('user', 'registros'));
+}
 }

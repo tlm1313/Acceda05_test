@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="alert alert-primary">
-        <h1>Zona de Administrador</h1>
+        <h2>Zona de Administrador</h2>
         <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p>
 
         <!-- Formulario de CREACIÓN separado -->
@@ -82,7 +82,18 @@
                                         <i class="fas fa-trash"></i> Eliminar
                                     </button>
                                 </form>
+                                 <!-- Botón para ver detalles del usuario / acceso a modal -->
+
+                            @if($usuario->role->nombre_rol === 'Usuario')
+                                <button class="btn btn-sm btn-info view-user-details"
+                                        data-user-id="{{ $usuario->id }}">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                            @endif
+
+
                             </div>
+
                         </td>
                     </tr>
                     @endforeach
@@ -105,6 +116,46 @@
         font-size: 0.875rem;
     }
 </style>
+<!-- Modal para detalles (añade esto al final del archivo) -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userDetailsModalLabel">Detalles del Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="userDetailsContent">
+                <!-- Contenido cargado via AJAX -->
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @endsection
 
+<!-- Añade este script al final -->
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.view-user-details');
+        if (!btn) return;
+
+        try {
+            const response = await fetch(`/admin/users/${btn.dataset.userId}/details`);
+            const html = await response.text();
+            document.getElementById('userDetailsContent').innerHTML = html;
+            new bootstrap.Modal('#userDetailsModal').show();
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
+});
+</script>
+@endsection
