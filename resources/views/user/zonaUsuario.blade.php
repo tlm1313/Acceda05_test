@@ -3,8 +3,20 @@
 @section('content')
 <div class="container">
     <div class="alert alert-success">
-        <h1>Zona de Usuario</h1>
-        <p>Hola, {{ Auth::user()->name }}. Estás en tu área privada de usuario.</p>
+        <div class="d-flex">
+            <div class="p-2 flex-grow-1">
+                <h2>Zona de Usuario</h2>
+                {{-- <p>Hola, {{ Auth::user()->name }}. Estás en tu área privada de usuario.</p> --}}
+            </div>
+
+            <div class="p-2 text-end"><form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-danger" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+            </form>
+            </div>
+        </div>
 
         <div class="table-responsive">
 
@@ -84,7 +96,34 @@
 
         </tbody>
         </table>
+        <!-- Control de Asistencia -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Control de Asistencia</h5>
+                </div>
+                <div class="card-body">
+                   <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <form action="{{ route('user.entrada', $user->id) }}" method="POST" class="d-inline">
+                            @csrf
+                                <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-sign-in-alt"></i> Registrar Entrada
+                                </button>
+                            </form>
+                        </div>
+                        <div>
+                            <form action="{{ route('user.salida', $user->id) }}" method="POST" class="d-inline">
+                            @csrf
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-sign-out-alt"></i> Registrar Salida
+                                </button>
+                            </form>
+                        </div>
+                    </div>
 
+
+                </div>
+            </div>
 
     </div>
 </div>
@@ -92,7 +131,7 @@
 <div class="col-md-9">
 <div class="card mb-3" style="max-width: auto;">
     <div class="card-header">
-        <h5>Historial Reciente</h5>
+        <h5>Registros de Acceso</h5>
     </div>
 
 <!-- resources/views/user/zonaUsuario.blade.php -->
@@ -175,9 +214,9 @@
 <!-- boton descarga pdf. funciona para todas las pestañas -->
 
 <div class="card mt-4">
-    <div class="card-header">
+  {{--   <div class="card-header">
         <h5>Exportar Registros</h5>
-    </div>
+    </div> --}}
     <div class="card-body">
         <form id="pdfForm" action="{{ route('registros.pdf') }}" method="POST">
     @csrf
@@ -195,27 +234,7 @@
 </div>
 
 
-<!-- Control de Asistencia -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h5>Control de Asistencia</h5>
-    </div>
-    <div class="card-body">
-        <form action="{{ route('user.entrada', $user->id) }}" method="POST" class="d-inline">
-            @csrf
-            <button type="submit" class="btn btn-success me-2">
-                <i class="fas fa-sign-in-alt"></i> Registrar Entrada
-            </button>
-        </form>
 
-        <form action="{{ route('user.salida', $user->id) }}" method="POST" class="d-inline">
-            @csrf
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-sign-out-alt"></i> Registrar Salida
-            </button>
-        </form>
-    </div>
-</div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Guardar y recuperar pestaña activa

@@ -227,7 +227,7 @@ class AdminController extends Controller
         }
     }
 
-    $registros = $query->paginate(15)->appends($request->query());
+    $registros = $query->paginate(10)->appends($request->query());
 
     $meses = [
         1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
