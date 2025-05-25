@@ -4,21 +4,38 @@
 <div class="container">
     <div class="alert alert-primary">
         <div class="d-flex">
-        <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
-        <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p></div>
-        <div class="p-2"><div>
-        <a href="{{ route('admin.index') }}" class="btn btn-sm btn-outline-secondary" title="Volver">
-            <i class="fas fa-arrow-left me-1"></i> Volver
-        </a>
-    </div></div>
-        <div class="p-2 text-end"><form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="btn btn-sm btn-danger" title="Cerrar sesión">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
-        </form>
+            <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
+            {{-- <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p> --}}
+            </div>
 
-        </div>
+            <div class="p-2">
+                <a href="{{ route('admin.index') }}" class="btn btn-sm btn-outline-secondary" title="Volver">
+                    <i class="fas fa-arrow-left me-1"></i> Volver
+                </a>
+            </div>
+
+                        <div class="p-2">
+                <form method="GET" action="{{ route('admin.export.pdf') }}" class="d-inline">
+                @foreach(request()->all() as $key => $value)
+                    @if($key !== '_token' && $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endif
+                @endforeach
+                <button type="submit" class="btn btn-sm btn-primary me-2">
+                    <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                </button>
+            </form>
+            </div>
+
+            <div class="p-2">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-danger" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+
+            </div>
         </div>
     <div class="card mb-4">
         <div class="card-header">

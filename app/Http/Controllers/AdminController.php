@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Foto;
 use App\Models\Registro;
 use Carbon\Carbon;
+use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 class AdminController extends Controller
 {
 
@@ -237,5 +238,70 @@ class AdminController extends Controller
 
     return view('admin.all-registers', compact('registros', 'meses'));
 }
+
+ /**
+     * Funcion para exportar Pdfs.
+     *
+     */
+
+public function exportPdf(Request $request)
+{
+    // Reutilizamos la lógica de filtrado del método allRegisters
+    $query = Registro::with('user')->latest();
+
+    if ($request->filled('mes') && $request->filled('anio')) {
+        $query->whereMonth('fecha_hora', $request->mes)
+              ->whereYear('fecha_hora', $request->anio);
+    }
+
+    if ($request->filled('fecha_inicio') && $request->filled('fecha_fin') && !$request->filled('dni')) {
+        $query->whereBetween('fecha_hora', [
+            Carbon::parse($request->fecha_inicio)->startOfDay(),
+            Carbon::parse($request->fecha_fin)->endOfDay()
+        ]);
+    }
+
+    if ($request->filled('dni')) {
+        $query->whereHas('user', function($q) use ($request) {
+            $q->where('Dni', $request->dni);
+        });
+
+        if ($request->filled('fecha_inicio_dni') && $request->filled('fecha_fin_dni')) {
+            $query->whereBetween('fecha_hora', [
+                Carbon::parse($request->fecha_inicio_dni)->startOfDay(),
+                Carbon::parse($request->fecha_fin_dni)->endOfDay()
+            ]);
+        }
+    }
+
+    $registros = $query->get();
+    $filtros = $request->all();
+
+     // Definir el array de meses
+    $meses = [
+        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+    ];
+
+
+    $pdf = PDF::loadView('admin.exports.registros-pdf', [
+        'registros' => $registros,
+        'filtros' => $filtros,
+        'meses' => $meses // Pasamos la variable a la vista
+    ])->setOptions([
+        'encoding' => 'UTF-8',
+        'margin-top' => 15,
+        'margin-bottom' => 15,
+        'margin-left' => 10,
+        'margin-right' => 10
+    ]);
+
+    return $pdf->download('registros-'.now()->format('Y-m-d').'.pdf');
+}
+
+
+
+
 
 }

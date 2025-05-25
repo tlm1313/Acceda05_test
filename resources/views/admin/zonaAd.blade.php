@@ -5,8 +5,9 @@
     <div class="alert alert-primary">
         <div class="d-flex">
         <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
-        <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p></div>
-        <div class="p-2"><a href="{{ route('admin.all.registers') }}" class="btn btn-sm btn-primary me-2">
+        {{-- <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p> --}}
+        </div>
+        <div class="p-2"><a href="{{ route('admin.all.registers') }}" class="btn btn-sm btn-success me-2">
                 <i class="fas fa-table"></i> Ver Registros
             </a></div>
         <div class="p-2 text-end"><form method="POST" action="{{ route('logout') }}">
@@ -100,7 +101,7 @@
                                 </form>
 
                                 @if($usuario->role->nombre_rol === 'Usuario')
-                                    <button class="btn btn-sm btn-info view-user-details"
+                                    <button class="btn btn-sm btn-success view-user-details"
                                             data-user-id="{{ $usuario->id }}">
                                         <i class="fas fa-eye"></i> Ver
                                     </button>

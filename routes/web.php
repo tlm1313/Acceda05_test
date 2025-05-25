@@ -44,6 +44,8 @@ Route::middleware(['auth', 'EsAdmin'])->prefix('admin')->name('admin.')->group(f
 
      // ... otras rutas ...
     Route::get('/all-registers', [AdminController::class, 'allRegisters'])->name('all.registers');
+    Route::get('/admin/export-pdf', [AdminController::class, 'exportPdf'])
+     ->name('export.pdf');
 
 
 });
