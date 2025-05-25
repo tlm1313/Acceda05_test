@@ -107,5 +107,12 @@
             });
         });
     </script>
+
+
 </body>
+<footer class="footer fixed-bottom py-3 bg-dark text-white">
+    <div class="container text-center">
+        <small>&copy; {{ date('Y') }} {{ config('app.name') }} - Todos los derechos reservados</small>
+    </div>
+</footer>
 </html>
