@@ -64,21 +64,28 @@
                 </form>
             </div>
 
-            <!-- Filtro 4: Por DNI y fecha -->
+
+            <!-- Filtro 4: Por DNI con rango de fechas -->
             <div class="collapse {{ request()->has('dni') ? 'show' : '' }}" id="filtroDNI">
                 <form method="GET" action="{{ route('admin.all.registers') }}" class="row g-3">
                     <div class="col-md-4">
                         <input type="text" name="dni" class="form-control"
-                               value="{{ request('dni') }}" placeholder="DNI del usuario" required>
+                            value="{{ request('dni') }}" placeholder="DNI del usuario" required>
                     </div>
-                    <div class="col-md-4">
-                        <input type="date" name="fecha_exacta" class="form-control"
-                               value="{{ request('fecha_exacta') }}" max="{{ date('Y-m-d') }}">
+                    <div class="col-md-3">
+                        <input type="date" name="fecha_inicio_dni" class="form-control"
+                            value="{{ request('fecha_inicio_dni') }}" max="{{ date('Y-m-d') }}"
+                            placeholder="Fecha inicio">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
+                        <input type="date" name="fecha_fin_dni" class="form-control"
+                            value="{{ request('fecha_fin_dni') }}" max="{{ date('Y-m-d') }}"
+                            placeholder="Fecha fin">
+                    </div>
+                    <div class="col-md-1">
                         <button type="submit" class="btn btn-primary w-100">Buscar</button>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <a href="{{ route('admin.all.registers') }}" class="btn btn-secondary w-100">Limpiar</a>
                     </div>
                 </form>
@@ -136,11 +143,26 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Validar que fecha inicio no sea mayor a fecha fin
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const fechaInicio = form.querySelector('[name="fecha_inicio_dni"]')?.value;
+            const fechaFin = form.querySelector('[name="fecha_fin_dni"]')?.value;
+
+            if (fechaInicio && fechaFin && fechaInicio > fechaFin) {
+                e.preventDefault();
+                alert('La fecha de inicio no puede ser mayor a la fecha final');
+                return false;
+            }
+        });
+    });
+
     // Activar el tab correspondiente al filtro actual
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('dni')) {
         document.querySelector('#filtroDNI').classList.add('show');
-    } else if (urlParams.has('fecha_inicio')) {
+    } else if (urlParams.has('fecha_inicio') && !urlParams.has('dni')) {
         document.querySelector('#filtroPersonalizado').classList.add('show');
     } else if (urlParams.has('mes')) {
         document.querySelector('#filtroMes').classList.add('show');

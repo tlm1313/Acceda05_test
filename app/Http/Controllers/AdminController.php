@@ -28,7 +28,7 @@ class AdminController extends Controller
       /*   $usuarios = User::all();
         return view('admin.zonaAd', compact('usuarios'));// zonaAd es la vista que se va a mostrar */
 
-        $usuarios = User::with(['role', 'foto'])->paginate(3); // 10 usuarios por página
+        $usuarios = User::with(['role', 'foto'])->paginate(10); // 10 usuarios por página
         return view('admin.zonaAd', compact('usuarios'));
     }
 
@@ -205,24 +205,29 @@ class AdminController extends Controller
     }
 
     // Filtro 3: Personalizado (rango de fechas)
-    if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
+    if ($request->filled('fecha_inicio') && $request->filled('fecha_fin') && !$request->filled('dni')) {
         $query->whereBetween('fecha_hora', [
             Carbon::parse($request->fecha_inicio)->startOfDay(),
             Carbon::parse($request->fecha_fin)->endOfDay()
         ]);
     }
 
-    // Filtro 4: Por DNI y fecha concreta
+    // Filtro 4: Por DNI con rango de fechas
     if ($request->filled('dni')) {
         $query->whereHas('user', function($q) use ($request) {
             $q->where('Dni', $request->dni);
         });
-    }
-    if ($request->filled('fecha_exacta')) {
-        $query->whereDate('fecha_hora', $request->fecha_exacta);
+
+        // Añadir rango de fechas si están presentes
+        if ($request->filled('fecha_inicio_dni') && $request->filled('fecha_fin_dni')) {
+            $query->whereBetween('fecha_hora', [
+                Carbon::parse($request->fecha_inicio_dni)->startOfDay(),
+                Carbon::parse($request->fecha_fin_dni)->endOfDay()
+            ]);
+        }
     }
 
-    $registros = $query->paginate(10)->appends($request->query());
+    $registros = $query->paginate(15)->appends($request->query());
 
     $meses = [
         1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
