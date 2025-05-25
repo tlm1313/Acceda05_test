@@ -6,13 +6,17 @@
         <div class="d-flex">
         <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
         <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p></div>
-        <div class="p-2"></div>
+        <div class="p-2"><a href="{{ route('admin.all.registers') }}" class="btn btn-sm btn-primary me-2">
+                <i class="fas fa-table"></i> Ver Registros
+            </a></div>
         <div class="p-2 text-end"><form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn btn-sm btn-danger" title="Cerrar sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
-        </form></div>
+        </form>
+
+        </div>
         </div>
         <!-- Formulario de CREACIÓN separado -->
         <form action="{{ route('admin.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 p-3 bg-light rounded">
@@ -344,6 +348,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
     }
+
+
 });
 </script>
 @endsection

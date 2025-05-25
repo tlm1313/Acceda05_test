@@ -42,6 +42,10 @@ Route::middleware(['auth', 'EsAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/users/{user}/details', [AdminController::class, 'details'])
          ->name('admin.users.details');
 
+     // ... otras rutas ...
+    Route::get('/all-registers', [AdminController::class, 'allRegisters'])->name('all.registers');
+
+
 });
 
 // Ruta de prueba PDF (opcional)
