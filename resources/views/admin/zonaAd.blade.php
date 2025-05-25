@@ -3,9 +3,17 @@
 @section('content')
 <div class="container">
     <div class="alert alert-primary">
-        <h2>Zona de Administrador</h2>
-        <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p>
-
+        <div class="d-flex">
+        <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
+        <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p></div>
+        <div class="p-2"></div>
+        <div class="p-2 text-end"><form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-danger" title="Cerrar sesión">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </form></div>
+        </div>
         <!-- Formulario de CREACIÓN separado -->
         <form action="{{ route('admin.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 p-3 bg-light rounded">
             @csrf
