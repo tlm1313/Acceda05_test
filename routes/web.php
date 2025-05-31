@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 Route::redirect('/', '/login');
 
 // Autenticación (routes/auth.php ya incluido por defecto)
-Auth::routes(['register' => true]);
+Auth::routes(['register' => false]);
 
 // Rutas para usuarios autenticados
 Route::middleware('auth')->group(function () {

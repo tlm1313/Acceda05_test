@@ -8,6 +8,7 @@ use App\Models\Foto;
 use App\Models\Registro;
 use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Validation\Rule;
 class AdminController extends Controller
 {
 
@@ -29,7 +30,7 @@ class AdminController extends Controller
       /*   $usuarios = User::all();
         return view('admin.zonaAd', compact('usuarios'));// zonaAd es la vista que se va a mostrar */
 
-        $usuarios = User::with(['role', 'foto'])->paginate(10); // 10 usuarios por página
+        $usuarios = User::with(['role', 'foto'])->paginate(8); // 8 usuarios por página
         return view('admin.zonaAd', compact('usuarios'));
     }
 
@@ -89,6 +90,14 @@ class AdminController extends Controller
         //
 
         $usuario = User::findOrFail($id);
+         $request->validate([
+        'email' => [
+            'required',
+            'email',
+            Rule::unique('users')->ignore($usuario->id),
+        ],
+    ]);
+    try{
     $entrada = $request->except(['password']); // Excluimos password inicialmente
 
     // Solo actualizar password si se proporcionó
@@ -103,8 +112,20 @@ class AdminController extends Controller
         $entrada['foto_id'] = $foto->id;
     }
 
+
+
     $usuario->update($entrada);
     return redirect()->route('admin.index')->with('success', 'Usuario actualizado');
+    } catch (\Illuminate\Database\QueryException $e) {
+        $errorCode = $e->errorInfo[1];
+
+        if($errorCode == 1062) {
+            return back()->withInput()->with('error', 'El email o DNI ya están registrados');
+        }
+
+        return back()->withInput()->with('error', 'Error al actualizar el usuario');
+    }
+
     }
 
     /**

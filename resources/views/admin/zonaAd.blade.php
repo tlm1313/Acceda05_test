@@ -4,7 +4,7 @@
 <div class="container">
     <div class="alert alert-primary">
         <div class="d-flex">
-        <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
+        <div class="p-2 flex-grow-1"><h3>Zona de Administrador</h3>
         {{-- <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p> --}}
         </div>
         <div class="p-2"><a href="{{ route('admin.all.registers') }}" class="btn btn-sm btn-success me-2">
@@ -41,7 +41,8 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <input type="email" class="form-control form-control-sm" placeholder="Email" name="email" required>
+                    <input type="email" name="email" id="email-input" class="form-control form-control-sm" required>
+<div id="email-error" class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-1">
                     <input type="password" class="form-control form-control-sm" placeholder="Contraseña" name="password" required>
@@ -351,6 +352,46 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+});
+$(document).ready(function() {
+    // Interceptar envío de formulario
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const submitBtn = form.find('button[type="submit"]');
+        submitBtn.prop('disabled', true);
+
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            data: form.serialize(),
+            success: function(response) {
+                // Redireccionar o mostrar mensaje de éxito
+                window.location.href = response.redirect || '/admin';
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false);
+
+                // Limpiar errores anteriores
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').text('');
+
+                // Mostrar nuevos errores
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    for (const field in errors) {
+                        const input = $(`[name="${field}"]`);
+                        input.addClass('is-invalid');
+                        input.next('.invalid-feedback').text(errors[field][0]);
+                    }
+                } else {
+                    // Error inesperado
+                    alert('Email Repetido. Por favor intentelo de nuevo.');
+                }
+            }
+        });
+    });
 });
 </script>
 @endsection

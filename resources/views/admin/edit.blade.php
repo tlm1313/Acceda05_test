@@ -68,7 +68,9 @@
                                 </tr>
                                 <tr>
                                     <th>Email</th>
-                                    <th><input type="email" name="email" id="email" value="{{ $usuario->email }}" class="form-control form-control-sm" requiered title="Campo Obligatorio"></th>
+                                    <th><input type="email" name="email" id="email-input" value="{{ $usuario->email }}" class="form-control form-control-sm" required title="Campo Obligatorio">
+                                            <div id="email-error" class="invalid-feedback"></div>
+                                    </th>
                                 </tr>
                                 <tr>
                                     <th>Password</th>
@@ -103,5 +105,50 @@
     </div>
 </div>
 @endsection
+@section('scripts')
+<script>
+$(document).ready(function() {
+    // Interceptar envío de formulario
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const submitBtn = form.find('button[type="submit"]');
+        submitBtn.prop('disabled', true);
+
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            data: form.serialize(),
+            success: function(response) {
+                // Redireccionar o mostrar mensaje de éxito
+                window.location.href = response.redirect || '/admin';
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false);
+
+                // Limpiar errores anteriores
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').text('');
+
+                // Mostrar nuevos errores
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    for (const field in errors) {
+                        const input = $(`[name="${field}"]`);
+                        input.addClass('is-invalid');
+                        input.next('.invalid-feedback').text(errors[field][0]);
+                    }
+                } else {
+                    // Error inesperado
+                    alert('Email Repetido. Por favor intentelo de nuevo.');
+                }
+            }
+        });
+    });
+});
+</cript>
+@endsection
+
 
 
