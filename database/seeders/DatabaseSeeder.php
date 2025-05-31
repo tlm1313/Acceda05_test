@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\AdminUserSeeder;
+use Database\Seeders\FakeUserSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             RoleUserSeeder::class,
             FotoUserSeeder::class,
             AdminUserSeeder::class,
+            FakeUserSeeder::class,
+            FakeRegistrosSeeder::class,
 
             // Otros seeders que quieras ejecutar
         ]);
