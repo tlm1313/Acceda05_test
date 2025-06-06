@@ -4,9 +4,28 @@
 
 <div class="container">
     <div class="alert alert-primary">
-        <h1>Zona de Administrador</h1>
+       <div class="d-flex">
+            <div class="p-2 flex-grow-1"><h2>Zona de Administrador</h2>
+            {{-- <p>Bienvenido, {{ Auth::user()->name }}. Tienes acceso como administrador.</p> --}}
+            </div>
 
+            <div class="p-2">
+                <a href="{{ route('admin.index') }}" class="btn btn-sm btn-outline-secondary" title="Volver">
+                    <i class="fas fa-arrow-left me-1"></i> Volver
+                </a>
+            </div>
 
+            <div class="p-2">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-danger" title="Cerrar sesión">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+
+            </div>
+
+        </div>
         <form name="form1" action="{{ route('admin.update', $usuario->id) }}" method="POST" enctype="multipart/form-data" id="form1">
             @csrf
             @method('PATCH')

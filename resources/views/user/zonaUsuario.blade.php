@@ -24,23 +24,26 @@
                     <div class="row g-0">
 
                       <div class="col-md-3">
-                        <div class="card-body">
-                          <h5 class="card-title">Datos Usuario</h5>
-                          <div class="col-md-3 text-center">
+                        <div class="table table-striped table-bordered table-hover card-text">
+                            <div class="card-header">
 
-                            @if ($user->foto)
-                            <th><img src="/fotos/{{$user->foto->foto}}" alt="foto de perfil" class="img-fluid rounded-start "></th>
-                            <th><input type="hidden" name="foto" id="foto" value="{{$user->foto->foto}}"></th>
-                            @else
-                            <th><img src="/fotos/default.png" alt="sin foto" class="img-fluid rounded-start"></th>
-                            @endif
+                                <h5 class="card-title">Datos Usuario</h5>
+                            </div>
+                          <div class="col-md-12 text-center">
 
-                            {{-- <img src="..." class="img-fluid rounded-start" alt="..."> --}}
+                                @if ($user->foto)
+                                <th><img src="/fotos/{{$user->foto->foto}}" alt="foto de perfil" class="img-fluid rounded-end "></th>
+                                <th><input type="hidden" name="foto" id="foto" value="{{$user->foto->foto}}"></th>
+                                @else
+                                <th><img src="/fotos/default.png" alt="sin foto" class="img-fluid rounded-start"></th>
+                                @endif
+
+                                {{-- <img src="..." class="img-fluid rounded-start" alt="..."> --}}
                           </div>
                           <table class="table table-striped table-bordered table-hover card-text">
-                            <thead>
+                            {{-- <thead>
 
-                            </thead>
+                            </thead> --}}
                             <tbody>
 
 

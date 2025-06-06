@@ -145,8 +145,8 @@
                         <tr>
                             <th>Nombre</th>
                             <th>Apellidos</th>
-                            <th>Email</th>
                             <th>DNI</th>
+                            <th>Email</th>
                             <th>Fecha/Hora</th>
                             <th>Tipo</th>
                         </tr>

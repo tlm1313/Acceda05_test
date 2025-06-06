@@ -3,9 +3,9 @@
     <div class="row mb-4">
         <div class="col-md-3 text-center">
             @if($user->foto)
-                <img src="/fotos/{{ $user->foto->foto }}" class="img-thumbnail" width="120">
+                <img src="/fotos/{{ $user->foto->foto }}" class="img-fluid rounded-start" alt="Foto de perfil">
             @else
-                <img src="/fotos/default.png" class="img-thumbnail" width="120">
+                <img src="/fotos/default.png" class="img-fluid rounded-start" >
             @endif
         </div>
         <div class="col-md-9">

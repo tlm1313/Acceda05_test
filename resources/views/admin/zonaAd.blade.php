@@ -41,7 +41,7 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <input type="email" name="email" id="email-input" class="form-control form-control-sm" required>
+                    <input type="email" name="email" id="email-input" class="form-control form-control-sm" placeholder="Email" required>
 <div id="email-error" class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-1">

@@ -136,7 +136,7 @@ class AdminController extends Controller
         //
         $usuario = User::findOrFail($id);
        // Eliminar la foto del servidor
-        if($usuario->foto) {
+        if($usuario->foto && $usuario->foto == null) {
             $fotoPath = public_path('fotos/'.$usuario->foto->foto);
             if(file_exists($fotoPath)) {
                 unlink($fotoPath);
@@ -155,56 +155,56 @@ class AdminController extends Controller
      */
 
        public function details(Request $request, $id)
-{
-    $user = User::with(['role', 'foto'])->findOrFail($id);
+    {
+        $user = User::with(['role', 'foto'])->findOrFail($id);
 
-    // Parámetros de filtrado
-    $tipoFiltro = $request->input('tipo', 'semana'); // semana/mes/personalizado
-    $mes = $request->input('mes', date('m'));
-    $anio = $request->input('anio', date('Y'));
-    $fechaInicio = $request->input('fecha_inicio');
-    $fechaFin = $request->input('fecha_fin');
+        // Parámetros de filtrado
+        $tipoFiltro = $request->input('tipo', 'semana'); // semana/mes/personalizado
+        $mes = $request->input('mes', date('m'));
+        $anio = $request->input('anio', date('Y'));
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
 
-    // Consulta base
-    $registros = $user->registros()->latest();
+        // Consulta base
+        $registros = $user->registros()->latest();
 
-    // Aplicar filtros según el tipo
-    switch ($tipoFiltro) {
-        case 'semana':
-            $registros->where('fecha_hora', '>=', now()->subDays(7));
-            break;
+        // Aplicar filtros según el tipo
+        switch ($tipoFiltro) {
+            case 'semana':
+                $registros->where('fecha_hora', '>=', now()->subDays(7));
+                break;
 
-        case 'mes':
-            $registros->whereMonth('fecha_hora', $mes)
-                     ->whereYear('fecha_hora', $anio);
-            break;
+            case 'mes':
+                $registros->whereMonth('fecha_hora', $mes)
+                        ->whereYear('fecha_hora', $anio);
+                break;
 
-        case 'personalizado':
-            if ($fechaInicio && $fechaFin) {
-                $registros->whereBetween('fecha_hora', [
-                    Carbon::parse($fechaInicio)->startOfDay(),
-                    Carbon::parse($fechaFin)->endOfDay()
-                ]);
-            }
-            break;
-    }
+            case 'personalizado':
+                if ($fechaInicio && $fechaFin) {
+                    $registros->whereBetween('fecha_hora', [
+                        Carbon::parse($fechaInicio)->startOfDay(),
+                        Carbon::parse($fechaFin)->endOfDay()
+                    ]);
+                }
+                break;
+        }
 
-    $meses = [
-        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
-    ];
+        $meses = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
 
-    return view('admin.userDetails', compact(
-        'user',
-        'registros',
-        'meses',
-        'mes',
-        'anio',
-        'fechaInicio',
-        'fechaFin',
-        'tipoFiltro'
-    ));
+        return view('admin.userDetails', compact(
+            'user',
+            'registros',
+            'meses',
+            'mes',
+            'anio',
+            'fechaInicio',
+            'fechaFin',
+            'tipoFiltro'
+        ));
 
     }
 
@@ -215,50 +215,50 @@ class AdminController extends Controller
 
 
     public function allRegisters(Request $request)
-{
-    $query = Registro::with('user')->latest();
+    {
+        $query = Registro::with('user')->latest();
 
-    // Filtro 1: Todos los registros (no necesita condición adicional)
+        // Filtro 1: Todos los registros (no necesita condición adicional)
 
-    // Filtro 2: Por mes
-    if ($request->filled('mes') && $request->filled('anio')) {
-        $query->whereMonth('fecha_hora', $request->mes)
-              ->whereYear('fecha_hora', $request->anio);
-    }
+        // Filtro 2: Por mes
+        if ($request->filled('mes') && $request->filled('anio')) {
+            $query->whereMonth('fecha_hora', $request->mes)
+                ->whereYear('fecha_hora', $request->anio);
+        }
 
-    // Filtro 3: Personalizado (rango de fechas)
-    if ($request->filled('fecha_inicio') && $request->filled('fecha_fin') && !$request->filled('dni')) {
-        $query->whereBetween('fecha_hora', [
-            Carbon::parse($request->fecha_inicio)->startOfDay(),
-            Carbon::parse($request->fecha_fin)->endOfDay()
-        ]);
-    }
-
-    // Filtro 4: Por DNI con rango de fechas
-    if ($request->filled('dni')) {
-        $query->whereHas('user', function($q) use ($request) {
-            $q->where('Dni', $request->dni);
-        });
-
-        // Añadir rango de fechas si están presentes
-        if ($request->filled('fecha_inicio_dni') && $request->filled('fecha_fin_dni')) {
+        // Filtro 3: Personalizado (rango de fechas)
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin') && !$request->filled('dni')) {
             $query->whereBetween('fecha_hora', [
-                Carbon::parse($request->fecha_inicio_dni)->startOfDay(),
-                Carbon::parse($request->fecha_fin_dni)->endOfDay()
+                Carbon::parse($request->fecha_inicio)->startOfDay(),
+                Carbon::parse($request->fecha_fin)->endOfDay()
             ]);
         }
+
+        // Filtro 4: Por DNI con rango de fechas
+        if ($request->filled('dni')) {
+            $query->whereHas('user', function($q) use ($request) {
+                $q->where('Dni', $request->dni);
+            });
+
+            // Añadir rango de fechas si están presentes
+            if ($request->filled('fecha_inicio_dni') && $request->filled('fecha_fin_dni')) {
+                $query->whereBetween('fecha_hora', [
+                    Carbon::parse($request->fecha_inicio_dni)->startOfDay(),
+                    Carbon::parse($request->fecha_fin_dni)->endOfDay()
+                ]);
+            }
+        }
+
+        $registros = $query->paginate(10)->appends($request->query());
+
+        $meses = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
+
+        return view('admin.all-registers', compact('registros', 'meses'));
     }
-
-    $registros = $query->paginate(10)->appends($request->query());
-
-    $meses = [
-        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
-    ];
-
-    return view('admin.all-registers', compact('registros', 'meses'));
-}
 
  /**
      * Funcion para exportar Pdfs.
