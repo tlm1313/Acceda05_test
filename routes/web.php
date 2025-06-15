@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RegistroPdfController;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 // Redirección inicial
 Route::redirect('/', '/login');
@@ -49,7 +50,15 @@ Route::middleware(['auth', 'EsAdmin'])->prefix('admin')->name('admin.')->group(f
 
 
 });
+// Ruta para comprobar si un email ya está registrado
+Route::get('/check-email', function(Request $request) {
+    $email = $request->query('email');
+    $exists = \App\Models\User::where('email', $email)->exists();
 
+    return response()->json(['available' => !$exists]);
+});
+// Ruta de prueba para comprobar la subida de fotos
+Route::get('/check-upload', [AdminController::class, 'checkPhotoUpload']);
 // Ruta de prueba PDF (opcional)
 Route::get('/test-pdf', function() {
     try {

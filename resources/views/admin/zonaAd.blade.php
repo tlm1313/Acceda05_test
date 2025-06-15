@@ -42,13 +42,13 @@
                 </div>
                 <div class="col-md-2">
                     <input type="email" name="email" id="email-input" class="form-control form-control-sm" placeholder="Email" required>
-<div id="email-error" class="invalid-feedback"></div>
+                <div id="email-error" class="invalid-feedback"></div>
                 </div>
                 <div class="col-md-1">
                     <input type="password" class="form-control form-control-sm" placeholder="Contraseña" name="password" required>
                 </div>
                 <div class="col-md-2">
-                    <input class="form-control form-control-sm" type="file" name="foto_id">
+                    <input class="form-control form-control-sm" type="file" name="foto">
                 </div>
                 <div class="col-md-1">
                     <button type="submit" class="btn btn-sm btn-primary">Crear</button>
@@ -129,29 +129,7 @@
     </div>
 </div>
 
-<style>
-    .table th {
-        white-space: nowrap;
-    }
-    .img-thumbnail {
-        max-height: 60px;
-        object-fit: cover;
-    }
-    .form-control-sm, .form-select-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-    .pagination {
-        flex-wrap: wrap;
-    }
-    .page-item.active .page-link {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-    .page-link {
-        color: #0d6efd;
-    }
-</style>
+
 
 <!-- Modal para detalles -->
 <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
@@ -353,45 +331,85 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
-$(document).ready(function() {
-    // Interceptar envío de formulario
-    $('form').on('submit', function(e) {
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('email-input');
+    const emailError = document.getElementById('email-error');
+
+    // Función para verificar disponibilidad del email
+    async function checkEmailAvailability(email) {
+        try {
+            const response = await fetch(`/check-email?email=${encodeURIComponent(email)}`);
+            const data = await response.json();
+            return data.available;
+        } catch (error) {
+            console.error('Error:', error);
+            return true; // Permitir envío si hay error en la verificación
+        }
+    }
+
+    // Evento al enviar el formulario
+    const form = document.querySelector('form[action="{{ route('admin.store') }}"]');
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const form = $(this);
-        const submitBtn = form.find('button[type="submit"]');
-        submitBtn.prop('disabled', true);
+        const email = emailInput.value.trim();
 
-        $.ajax({
-            url: form.attr('action'),
-            method: form.attr('method'),
-            data: form.serialize(),
-            success: function(response) {
-                // Redireccionar o mostrar mensaje de éxito
-                window.location.href = response.redirect || '/admin';
-            },
-            error: function(xhr) {
-                submitBtn.prop('disabled', false);
+        // Verificar disponibilidad del email
+        const isAvailable = await checkEmailAvailability(email);
 
-                // Limpiar errores anteriores
-                $('.is-invalid').removeClass('is-invalid');
-                $('.invalid-feedback').text('');
+        if (!isAvailable) {
+            emailInput.classList.add('is-invalid');
+            emailError.textContent = 'Este email ya está registrado';
+            return;
+        }
 
-                // Mostrar nuevos errores
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-                    for (const field in errors) {
-                        const input = $(`[name="${field}"]`);
-                        input.addClass('is-invalid');
-                        input.next('.invalid-feedback').text(errors[field][0]);
-                    }
-                } else {
-                    // Error inesperado
-                    alert('Email Repetido. Por favor intentelo de nuevo.');
-                }
-            }
-        });
+        // Si el email está disponible, enviar formulario
+        this.submit();
+    });
+
+    // Limpiar mensaje de error al cambiar el email
+    emailInput.addEventListener('input', function() {
+        if (this.classList.contains('is-invalid')) {
+            this.classList.remove('is-invalid');
+            emailError.textContent = '';
+        }
     });
 });
+
 </script>
+<style>
+    .table th {
+        white-space: nowrap;
+    }
+    .img-thumbnail {
+        max-height: 60px;
+        object-fit: cover;
+    }
+    .form-control-sm, .form-select-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    .pagination {
+        flex-wrap: wrap;
+    }
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .page-link {
+        color: #0d6efd;
+    }
+    .invalid-feedback {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+    }
+
+    .is-invalid {
+    border-color: #dc3545;
+    }
+</style>
 @endsection

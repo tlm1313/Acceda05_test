@@ -9,6 +9,8 @@ use App\Models\Registro;
 use Carbon\Carbon;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 class AdminController extends Controller
 {
 
@@ -46,23 +48,25 @@ class AdminController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $entrada = $request->except('_token', 'foto'); // Excluye el campo foto
+public function store(Request $request)
+{
+ $entrada = $request->except('_token');
 
-    if ($request->hasFile('foto_id') && $request->file('foto_id')->isValid()) {
-        $archivo = $request->file('foto_id');
+    // Usa el nuevo nombre 'foto'
+    if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
+        $archivo = $request->file('foto');
         $nombreArchivo = time().'_'.$archivo->getClientOriginalName();
+
+        // Mover a public/fotos
         $archivo->move(public_path('fotos'), $nombreArchivo);
 
         $foto = Foto::create(['foto' => $nombreArchivo]);
-        $entrada['foto_id'] = $foto->id; // Asigna solo el ID
+        $entrada['foto_id'] = $foto->id;
     }
 
     User::create($entrada);
-            return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente');
-
-    }
+    return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente');
+}
 
     /**
      * Display the specified resource.
