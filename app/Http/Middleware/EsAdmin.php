@@ -26,4 +26,4 @@ class EsAdmin
         return $next($request);
     }
 }
-// Revisar con la documentacion de Laravel. no tengo claro si estoy operando bien.
+// Revisar la documentacion de Laravel. no tengo claro si estoy operando bien.

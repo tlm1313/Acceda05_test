@@ -14,7 +14,7 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
-// app/Http/Controllers/HomeController.php
+
 
 public function index(Request $request)
 {
@@ -24,13 +24,13 @@ public function index(Request $request)
         return redirect()->route('admin.index');
     }
 
-    // Obtener parámetros de filtrado
+    // Parámetros de filtrado
     $mes = $request->input('mes', date('m'));
     $anio = $request->input('anio', date('Y'));
     $fechaInicio = $request->input('fecha_inicio');
     $fechaFin = $request->input('fecha_fin');
 
-    // Consulta base
+    // Consulta bD
     $registrosQuery = $user->registros()->latest();
 
     // Registros semanales (últimos 7 días)

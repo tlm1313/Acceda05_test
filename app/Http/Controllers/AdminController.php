@@ -42,17 +42,17 @@ class AdminController extends Controller
     public function create()
     {
 
-        return view('admin.create');// zonaAd es la vista que se va a mostrar
+        return view('admin.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-public function store(Request $request)
-{
- $entrada = $request->except('_token');
+    public function store(Request $request)
+    {
+    $entrada = $request->except('_token');
 
-    // Usa el nuevo nombre 'foto'
+    // Validar datos de entrada
     if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
         $archivo = $request->file('foto');
         $nombreArchivo = time().'_'.$archivo->getClientOriginalName();
@@ -64,9 +64,9 @@ public function store(Request $request)
         $entrada['foto_id'] = $foto->id;
     }
 
-    User::create($entrada);
-    return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente');
-}
+        User::create($entrada);
+        return redirect()->route('admin.index')->with('success', 'Usuario creado correctamente');
+    }
 
     /**
      * Display the specified resource.
@@ -83,7 +83,7 @@ public function store(Request $request)
     {
         //
         $usuario = User::findOrFail($id);
-        return view('admin.edit', compact('usuario'));// zonaAd es la vista que se va a mostrar
+        return view('admin.edit', compact('usuario'));
     }
 
     /**
@@ -100,11 +100,11 @@ public function store(Request $request)
             'email',
             Rule::unique('users')->ignore($usuario->id),
         ],
-    ]);
+        ]);
     try{
     $entrada = $request->except(['password']); // Excluimos password inicialmente
 
-    // Solo actualizar password si se proporcionó
+    // Solo actualiza password si cambia
     if (!empty($request->password)) {
         $entrada['password'] = bcrypt($request->password);
     }
@@ -172,7 +172,7 @@ public function store(Request $request)
         // Consulta base
         $registros = $user->registros()->latest();
 
-        // Aplicar filtros según el tipo
+        // Aplicar filtros según pestaña seleccionada
         switch ($tipoFiltro) {
             case 'semana':
                 $registros->where('fecha_hora', '>=', now()->subDays(7));
@@ -220,9 +220,10 @@ public function store(Request $request)
 
     public function allRegisters(Request $request)
     {
+        // Filtro 1: Todos los registros
         $query = Registro::with('user')->latest();
 
-        // Filtro 1: Todos los registros (no necesita condición adicional)
+
 
         // Filtro 2: Por mes
         if ($request->filled('mes') && $request->filled('anio')) {
@@ -244,7 +245,8 @@ public function store(Request $request)
                 $q->where('Dni', $request->dni);
             });
 
-            // Añadir rango de fechas si están presentes
+            // Añadir rango de fechas si las hay
+
             if ($request->filled('fecha_inicio_dni') && $request->filled('fecha_fin_dni')) {
                 $query->whereBetween('fecha_hora', [
                     Carbon::parse($request->fecha_inicio_dni)->startOfDay(),
@@ -264,27 +266,27 @@ public function store(Request $request)
         return view('admin.all-registers', compact('registros', 'meses'));
     }
 
- /**
+    /**
      * Funcion para exportar Pdfs.
      *
      */
 
-public function exportPdf(Request $request)
-{
-    // Reutilizamos la lógica de filtrado del método allRegisters
-    $query = Registro::with('user')->latest();
+    public function exportPdf(Request $request)
+    {
+    // Misma la lógica de filtrado del método allRegisters
+        $query = Registro::with('user')->latest();
 
-    if ($request->filled('mes') && $request->filled('anio')) {
-        $query->whereMonth('fecha_hora', $request->mes)
+        if ($request->filled('mes') && $request->filled('anio')) {
+            $query->whereMonth('fecha_hora', $request->mes)
               ->whereYear('fecha_hora', $request->anio);
-    }
+        }
 
-    if ($request->filled('fecha_inicio') && $request->filled('fecha_fin') && !$request->filled('dni')) {
-        $query->whereBetween('fecha_hora', [
+        if ($request->filled('fecha_inicio') && $request->filled('fecha_fin') && !$request->filled('dni')) {
+            $query->whereBetween('fecha_hora', [
             Carbon::parse($request->fecha_inicio)->startOfDay(),
             Carbon::parse($request->fecha_fin)->endOfDay()
-        ]);
-    }
+            ]);
+        }
 
     if ($request->filled('dni')) {
         $query->whereHas('user', function($q) use ($request) {
@@ -297,30 +299,30 @@ public function exportPdf(Request $request)
                 Carbon::parse($request->fecha_fin_dni)->endOfDay()
             ]);
         }
-    }
+        }
 
-    $registros = $query->get();
-    $filtros = $request->all();
+        $registros = $query->get();
+        $filtros = $request->all();
 
      // Definir el array de meses
-    $meses = [
-        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
-        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
-        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
-    ];
+        $meses = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
 
 
-    $pdf = PDF::loadView('admin.exports.registros-pdf', [
-        'registros' => $registros,
-        'filtros' => $filtros,
-        'meses' => $meses // Pasamos la variable a la vista
-    ])->setOptions([
-        'encoding' => 'UTF-8',
-        'margin-top' => 15,
-        'margin-bottom' => 15,
-        'margin-left' => 10,
-        'margin-right' => 10
-    ]);
+        $pdf = PDF::loadView('admin.exports.registros-pdf', [
+            'registros' => $registros,
+            'filtros' => $filtros,
+            'meses' => $meses // Pasamos la variable a la vista
+        ])->setOptions([
+            'encoding' => 'UTF-8',
+            'margin-top' => 15,
+            'margin-bottom' => 15,
+            'margin-left' => 10,
+            'margin-right' => 10
+        ]);
 
     return $pdf->download('registros-'.now()->format('Y-m-d').'.pdf');
 }

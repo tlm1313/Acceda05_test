@@ -57,8 +57,10 @@ Route::get('/check-email', function(Request $request) {
 
     return response()->json(['available' => !$exists]);
 });
+
 // Ruta de prueba para comprobar la subida de fotos
 Route::get('/check-upload', [AdminController::class, 'checkPhotoUpload']);
+
 // Ruta de prueba PDF (opcional)
 Route::get('/test-pdf', function() {
     try {

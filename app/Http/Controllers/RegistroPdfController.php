@@ -18,7 +18,7 @@ class RegistroPdfController extends Controller
     }
 
 
- private function validarFiltros(Request $request): array
+    private function validarFiltros(Request $request): array
     {
         return $request->validate([
             'tipo' => 'sometimes|in:semana,mes,personalizado',

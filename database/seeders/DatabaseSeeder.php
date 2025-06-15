@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
             RoleUserSeeder::class,
             FotoUserSeeder::class,
             AdminUserSeeder::class,
-            FakeUserSeeder::class,
-            FakeRegistrosSeeder::class,
+            FakeUserSeeder::class, // Seeder para crear usuarios ficticios. Comenta esta línea si no quieres crear usuarios ficticios
+            FakeRegistrosSeeder::class, // Seeder para crear registros ficticios comenta esta línea si no quieres crear registros ficticios
 
             // Otros seeders que quieras ejecutar
         ]);

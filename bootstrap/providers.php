@@ -9,7 +9,7 @@ return [
 
     App\Providers\AppServiceProvider::class,
 
-     // Añade esto al final:
+     // Otros providers de la aplicación...
     Barryvdh\Snappy\ServiceProvider::class,
 ];
 
